@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">AppBasica</string>
+    <string name="title">Mi primera app móvil</string>
+    <string name="name_hint">Nombre</string>
+    <string name="default_name">Estudiante</string>
+
+    <string name="counter_value">Contador: %1$d</string>
+    <string name="counter_value_placeholder">Contador: 0</string>
+
+    <string name="btn_increment">Incrementar</string>
+    <string name="btn_reset">Reset</string>
+    <string name="btn_toast">Mostrar mensaje</string>
+    <string name="btn_details">Ver detalles</string>
+    <string name="btn_back">Volver</string>
+
+    <string name="toast_message">Hola %1$s. Contador = %2$d</string>
+    <string name="details_message">Detalles\nNombre: %1$s\nContador: %2$d</string>
+    <string name="details_placeholder">Detalles</string>
+</resources>

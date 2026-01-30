@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROPS_FILE="$ROOT_DIR/gradle/wrapper/gradle-wrapper.properties"
+
+if [[ ! -f "$PROPS_FILE" ]]; then
+  echo "ERROR: Missing $PROPS_FILE"
+  exit 1
+fi
+
+DIST_URL="$(grep -E '^distributionUrl=' "$PROPS_FILE" | cut -d'=' -f2- | sed 's#\\##g')"
+
+if [[ -z "$DIST_URL" ]]; then
+  echo "ERROR: distributionUrl not found in gradle-wrapper.properties"
+  exit 1
+fi
+
+GRADLE_USER_HOME="${GRADLE_USER_HOME:-$HOME/.gradle}"
+DIST_DIR="$GRADLE_USER_HOME/wrapper/dists"
+mkdir -p "$DIST_DIR"
+
+ZIP_NAME="$(basename "$DIST_URL")"
+VERSION="$(echo "$ZIP_NAME" | sed -E 's/^gradle-([0-9.]+)-.*/\1/')"
+URL_HASH="$(echo -n "$DIST_URL" | shasum | awk '{print $1}')"
+TARGET_DIR="$DIST_DIR/${ZIP_NAME%.zip}/$URL_HASH"
+GRADLE_HOME="$TARGET_DIR/gradle-$VERSION"
+
+#ZIP_NAME="$(basename "$DIST_URL")"
+#URL_HASH="$(echo -n "$DIST_URL" | shasum | awk '{print $1}')"
+#TARGET_DIR="$DIST_DIR/${ZIP_NAME%.zip}/$URL_HASH"
+#GRADLE_HOME="$TARGET_DIR/${ZIP_NAME%.zip}"
+
+if [[ ! -d "$GRADLE_HOME" ]]; then
+  echo "Downloading Gradle distribution:"
+  echo "  $DIST_URL"
+  TMP_ZIP="$(mktemp -t gradle-XXXXXX.zip)"
+  if command -v curl >/dev/null 2>&1; then
+    curl -L --fail -o "$TMP_ZIP" "$DIST_URL"
+  elif command -v wget >/dev/null 2>&1; then
+    wget -O "$TMP_ZIP" "$DIST_URL"
+  else
+    echo "ERROR: Need curl or wget to download Gradle."
+    exit 1
+  fi
+
+  mkdir -p "$TARGET_DIR"
+  unzip -oq "$TMP_ZIP" -d "$TARGET_DIR"
+  rm -f "$TMP_ZIP"
+fi
+
+exec "$GRADLE_HOME/bin/gradle" "$@"

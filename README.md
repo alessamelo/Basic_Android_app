@@ -1,1 +1,3 @@
-# Basic_Android_app
+.devcontainer/
+  devcontainer.json
+  setup-android-sdk.sh
